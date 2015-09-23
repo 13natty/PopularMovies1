@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/detailsView"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:background="#000000">
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top" />
+    <ScrollView
+        android:layout_below="@id/image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:shrinkColumns="*"
+            android:stretchColumns="*">
+            <TableRow>
+                    <TextView
+                        android:id="@+id/adult"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
+                        android:padding="10dp"
+                        android:textColor="#fff"
+                        android:text="Adult:"/>
+
+                    <TextView
+                        android:id="@+id/original_language"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
+                        android:padding="10dp"
+                        android:textColor="#fff"
+                        android:text="lang" />
+            </TableRow>
+            <TableRow>
+                <TextView
+                    android:id="@+id/original_title"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+
+                    android:padding="10dp"
+                    android:textColor="#fff"
+                    android:text="Original Title:"
+                    />
+                <TextView
+                    android:id="@+id/release_date"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+
+                    android:padding="10dp"
+                    android:textColor="#fff"
+                    android:text="Release Date"
+                    />
+            </TableRow>
+            <TableRow>
+                <TextView
+                    android:id="@+id/popularity"
+                    android:layout_height="wrap_content"
+
+                    android:padding="10dp"
+                    android:textColor="#fff"
+                    android:text="Popularity"
+                    />
+                <TextView
+                    android:id="@+id/vote_average"
+                    android:layout_height="wrap_content"
+
+                    android:padding="10dp"
+                    android:textColor="#fff"
+                    android:text="Vote Average"
+                    />
+            </TableRow>
+
+            <TableRow>
+                <TextView
+                    android:id="@+id/vote_count"
+                    android:layout_height="wrap_content"
+
+                    android:padding="10dp"
+                    android:textColor="#fff"
+                    android:text="Vote Count"
+                    />
+            </TableRow>
+
+            <TableRow>
+                <TextView
+                    android:id="@+id/overview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="none"
+                    android:singleLine="false"
+
+                    android:padding="10dp"
+                    android:textColor="#fff"
+                    android:text="Overview"
+                    android:layout_span="2" />
+            </TableRow>
+        </TableLayout>
+    </ScrollView>
+
+</RelativeLayout>
