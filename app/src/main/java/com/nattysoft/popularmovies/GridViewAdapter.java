@@ -2,6 +2,7 @@ package com.nattysoft.popularmovies;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,7 +50,11 @@ public class GridViewAdapter extends ArrayAdapter<ImageItem> {
 
         ImageItem item = data.get(position);
         holder.imageTitle.setText(item.getTitle());
-        Picasso.with(this.context).load("http://image.tmdb.org/t/p/w185/" + item.getImageURL()).into(holder.image);
+        if(this.context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+            Picasso.with(this.context).load("http://image.tmdb.org/t/p/w185/" + item.getImageURL()).into(holder.image);
+        }else {
+            Picasso.with(this.context).load("http://image.tmdb.org/t/p/w500/" + item.getImageURL()).into(holder.image);
+        }
         return row;
     }
 

@@ -1,16 +1,14 @@
 package com.nattysoft.popularmovies;
 
 import android.app.ProgressDialog;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -53,10 +51,27 @@ public class DetailsActivity extends AppCompatActivity {
         vote_countTextView.setText("Votes :"+getIntent().getStringExtra("vote_count"));
 
         TextView overviewTextView = (TextView) findViewById(R.id.overview);
-        overviewTextView.setText("Overview :"+getIntent().getStringExtra("overview"));
+        overviewTextView.setText("Overview :" + getIntent().getStringExtra("overview"));
 
-        loadBitmap("http://image.tmdb.org/t/p/w780/" + getIntent().getStringExtra("backdrop_path"));
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+            loadBitmap("http://image.tmdb.org/t/p/w500/" + getIntent().getStringExtra("backdrop_path"));
+        }else {
+            loadBitmap("http://image.tmdb.org/t/p/w780/" + getIntent().getStringExtra("backdrop_path"));
+        }
 
+
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            loadBitmap("http://image.tmdb.org/t/p/w780/" + getIntent().getStringExtra("backdrop_path"));
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            loadBitmap("http://image.tmdb.org/t/p/w500/" + getIntent().getStringExtra("backdrop_path"));
+        }
     }
 
     public void loadBitmap(String url) {
