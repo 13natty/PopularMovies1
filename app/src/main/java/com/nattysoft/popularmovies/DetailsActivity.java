@@ -6,8 +6,11 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -58,8 +61,7 @@ public class DetailsActivity extends AppCompatActivity {
         }else {
             loadBitmap("http://image.tmdb.org/t/p/w780/" + getIntent().getStringExtra("backdrop_path"));
         }
-
-
+        ((AppCompatActivity) this).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -72,6 +74,17 @@ public class DetailsActivity extends AppCompatActivity {
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             loadBitmap("http://image.tmdb.org/t/p/w500/" + getIntent().getStringExtra("backdrop_path"));
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void loadBitmap(String url) {

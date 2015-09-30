@@ -2,8 +2,11 @@ package com.nattysoft.popularmovies;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
@@ -25,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ProgressDialog pDialog;
 
-
+    private static final String MOVIE_KEY = "movieList";
 
     // JSON Node names
     private static final String TAG_RESULTS = "results";
@@ -71,8 +75,11 @@ public class MainActivity extends AppCompatActivity {
     private static String url;
     private static int sort = 0;
 
+    private static final String TAG = MainActivity.class.getName();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
         key = getString(R.string.movie_api_key);
 
@@ -81,8 +88,35 @@ public class MainActivity extends AppCompatActivity {
 
         moviesList = new ArrayList<ImageItem>();
 
-        // Calling async task to get json
-        new GetMovies().execute();
+        if(savedInstanceState == null || !savedInstanceState.containsKey(MOVIE_KEY)) {
+
+            if(isNetworkAvailable()) {
+                // Calling async task to get json
+                new GetMovies().execute();
+            }else{
+
+                new AlertDialog.Builder(MainActivity.this)
+                .setTitle("No connection.")
+                .setMessage("You have no internet connection.")
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).create().show();
+            }
+        } else {
+            moviesList = (ArrayList<ImageItem>) savedInstanceState.get(MOVIE_KEY);
+
+            displayGrid();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(MOVIE_KEY, moviesList);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -154,6 +188,13 @@ public class MainActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     /**
@@ -233,58 +274,65 @@ public class MainActivity extends AppCompatActivity {
             /**
              * Updating parsed JSON data into ListView
              * */
-            gridAdapter = new GridViewAdapter(MainActivity.this, R.layout.grid_item_layout, moviesList);
-            gridView = (GridView) findViewById(R.id.gridView);
-            gridView.setAdapter(gridAdapter);
 
-            gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                    //get details of the clicked item
-                    JSONObject c = null;
-                    try {
-                        c = movies.getJSONObject(position);
-
-                        poster_path = c.getString(TAG_POSTER_PATH);
-                        title = c.getString(TAG_TITLE);
-                        adult = c.getString(TAG_ADULT);
-                        backdrop_path = c.getString(TAG_BACKDROP_PATH);
-                        genre_ids = c.getString(TAG_GENRE_IDS);
-                        mov_id = c.getString(TAG_ID);
-                        original_language = c.getString(TAG_ORIGINAL_LANGUAGE);
-                        original_title = c.getString(TAG_ORIGINAL_TITLE);
-                        overview = c.getString(TAG_OVERVIEW);
-                        release_date = c.getString(TAG_RELEASE_DATE);
-                        popularity = c.getString(TAG_POPULARITY);
-                        video = c.getString(TAG_VIDEO);
-                        vote_average = c.getString(TAG_VOTE_AVERAGE);
-                        vote_count = c.getString(TAG_VOTE_COUNT);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                    ImageItem item = (ImageItem) parent.getItemAtPosition(position);
-                    //Create intent
-                    Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
-                    intent.putExtra("title", item.getTitle());
-                    intent.putExtra("imageURL", item.getImageURL());
-                    intent.putExtra("adult", adult);
-                    intent.putExtra("backdrop_path", backdrop_path);
-                    intent.putExtra("genre_ids", genre_ids);
-                    intent.putExtra("id", mov_id);
-                    intent.putExtra("original_language", original_language);
-                    intent.putExtra("original_title", original_title);
-                    intent.putExtra("overview", overview);
-                    intent.putExtra("release_date", release_date);
-                    intent.putExtra("popularity", popularity);
-                    intent.putExtra("video", video);
-                    intent.putExtra("vote_average", vote_average);
-                    intent.putExtra("vote_count", vote_count);
-
-                    //Start details activity
-                    startActivity(intent);
-                }
-            });
-
+            displayGrid();
         }
+    }
+
+    private void displayGrid() {
+
+        gridAdapter = new GridViewAdapter(MainActivity.this, R.layout.grid_item_layout, moviesList);
+        gridView = (GridView) findViewById(R.id.gridView);
+        gridView.setAdapter(gridAdapter);
+
+        Log.d(TAG, "moviesList" + moviesList);
+
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                //get details of the clicked item
+                JSONObject c = null;
+                try {
+                    c = movies.getJSONObject(position);
+
+                    poster_path = c.getString(TAG_POSTER_PATH);
+                    title = c.getString(TAG_TITLE);
+                    adult = c.getString(TAG_ADULT);
+                    backdrop_path = c.getString(TAG_BACKDROP_PATH);
+                    genre_ids = c.getString(TAG_GENRE_IDS);
+                    mov_id = c.getString(TAG_ID);
+                    original_language = c.getString(TAG_ORIGINAL_LANGUAGE);
+                    original_title = c.getString(TAG_ORIGINAL_TITLE);
+                    overview = c.getString(TAG_OVERVIEW);
+                    release_date = c.getString(TAG_RELEASE_DATE);
+                    popularity = c.getString(TAG_POPULARITY);
+                    video = c.getString(TAG_VIDEO);
+                    vote_average = c.getString(TAG_VOTE_AVERAGE);
+                    vote_count = c.getString(TAG_VOTE_COUNT);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                ImageItem item = (ImageItem) parent.getItemAtPosition(position);
+                //Create intent
+                Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
+                intent.putExtra("title", item.getTitle());
+                intent.putExtra("imageURL", item.getImageURL());
+                intent.putExtra("adult", adult);
+                intent.putExtra("backdrop_path", backdrop_path);
+                intent.putExtra("genre_ids", genre_ids);
+                intent.putExtra("id", mov_id);
+                intent.putExtra("original_language", original_language);
+                intent.putExtra("original_title", original_title);
+                intent.putExtra("overview", overview);
+                intent.putExtra("release_date", release_date);
+                intent.putExtra("popularity", popularity);
+                intent.putExtra("video", video);
+                intent.putExtra("vote_average", vote_average);
+                intent.putExtra("vote_count", vote_count);
+
+                //Start details activity
+                startActivity(intent);
+            }
+        });
     }
 }
