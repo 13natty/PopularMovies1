@@ -5,6 +5,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -23,7 +25,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Properties;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -69,7 +74,8 @@ public class MainActivity extends AppCompatActivity {
     private String video;
     private String vote_average;
     private String vote_count;
-    private String key;
+
+    public static String KEY;
 
     // URL to get themoviedb JSON
     private static String url;
@@ -81,9 +87,8 @@ public class MainActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         super.onCreate(savedInstanceState);
-        key = getString(R.string.movie_api_key);
-
-        url = "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key="+key;
+        KEY = getString(R.string.movie_api_key);
+        url = "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key="+ KEY;
         setContentView(R.layout.activity_main);
 
         moviesList = new ArrayList<ImageItem>();
@@ -143,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
                         switch(item){
                             case 0:
                                 if(sort!=0) {
-                                    url = "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key="+key;
+                                    url = "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key="+ KEY;
                                     sort = 0;
                                     moviesList = new ArrayList<ImageItem>();
                                     new GetMovies().execute();
@@ -162,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             case 1:
                                 if(sort!=1) {
-                                    url = "http://api.themoviedb.org/3/discover/movie?sort_by=vote_average.desc&api_key="+key;
+                                    url = "http://api.themoviedb.org/3/discover/movie?sort_by=vote_average.desc&api_key="+ KEY;
                                     sort = 1;
                                     moviesList = new ArrayList<ImageItem>();
                                     new GetMovies().execute();
@@ -200,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Async task class to get json by making HTTP call
      */
-    private class GetMovies extends AsyncTask<Void, Void, Void> {
+    private class GetMovies extends AsyncTask<Void, Void, String> {
 
         @Override
         protected void onPreExecute() {
@@ -214,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(Void... arg0) {
+        protected String doInBackground(Void... arg0) {
             // Creating service handler class instance
             ServiceHandler sh = new ServiceHandler();
 
@@ -223,9 +228,23 @@ public class MainActivity extends AppCompatActivity {
 
             Log.d("Response: ", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + jsonStr);
 
-            if (jsonStr != null) {
+
+            return jsonStr;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            // Dismiss the progress dialog
+            if (pDialog.isShowing())
+                pDialog.dismiss();
+            /**
+             * Updating parsed JSON data into ListView
+             * */
+
+            if (result != null) {
                 try {
-                    JSONObject jsonObj = new JSONObject(jsonStr);
+                    JSONObject jsonObj = new JSONObject(result);
 
                     // Getting JSON Array node
                     movies = jsonObj.getJSONArray(TAG_RESULTS);
@@ -261,19 +280,6 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 Log.e("ServiceHandler", "Couldn't get any data from the url");
             }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            // Dismiss the progress dialog
-            if (pDialog.isShowing())
-                pDialog.dismiss();
-            /**
-             * Updating parsed JSON data into ListView
-             * */
 
             displayGrid();
         }
